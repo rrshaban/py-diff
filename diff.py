@@ -29,7 +29,7 @@ def Wagner_Fischer(in_string, out_string,
                     d[i-1][j-1] + substitution_cost # substitution of a character
                     )
 
-    return d[-1][-1]
+    return d[-1][-1] # Levenshtein edit distance for in_string -> out_string
 
 # Wagner_Fischer("aebc","abde") == 3
 # Wagner_Fischer([1,2,3],[1,2,3,4]) == 1
