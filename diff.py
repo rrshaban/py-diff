@@ -1,4 +1,5 @@
-def Wagner_Fischer(in_string, out_string):
+def Wagner_Fischer(in_string, out_string, 
+    insertion_cost=1, deletion_cost=1, substitution_cost=1):
     # Will produce a matrix of edit distances such that d[i,j] is the 
     # Levenshtein difference between in_string[:i] and out_string[:j]. These 
     # i and j are 1-indexed, as the Wagner-Fischer algorithm requires an 
@@ -23,9 +24,9 @@ def Wagner_Fischer(in_string, out_string):
                 d[i][j] = d[i-1][j-1]
             else:
                 d[i][j] = min(
-                    d[i-1][j] + 1,      # deletion of a character
-                    d[i][j-1] + 1,      # insertion of a character
-                    d[i-1][j-1] + 1     # substitution of a character
+                    d[i-1][j] + deletion_cost,      # deletion of a character
+                    d[i][j-1] + insertion_cost,     # insertion of a character
+                    d[i-1][j-1] + substitution_cost # substitution of a character
                     )
 
     return d[-1][-1]
