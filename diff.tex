@@ -1,0 +1,130 @@
+% \documentclass[11pt]{article}
+
+\documentclass[11pt,letterpaper]{article}
+% \usepackage{style}
+\usepackage{subfigure}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage[hyphens]{url}
+\usepackage{balance}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[T1]{fontenc}
+\usepackage{booktabs}
+\usepackage{natbib}
+\bibliographystyle{abbrvnat}
+
+% Uncomment these to reduce/eliminate widow/orphan lines.
+%\widowpenalty=10000
+%\clubpenalty=10000
+%\sloppy
+
+\begin{document}
+\newcommand{\diff}{\textbf{diff} }
+\newcommand{\patch}{\textbf{patch} }
+
+\date{}
+
+\title{Git and the Myers diff algorithm}
+
+\author{
+    Razi Shaban\\
+    Swarthmore College\\
+    rshaban1@cs.swarthmore.edu
+}
+
+\maketitle
+
+\begin{abstract}
+In this paper I will introduce DOM-diff in the context of Git, a version-control system used primarily for maintaining revisions of large quantities of text, usually programs. We can draw a parallel between the \emph{diff} and \emph{patch} components of \proc{Git} to the necessary functions of a DOM-diffing algorithm, and discuss the
+
+\end{abstract}
+
+\section{Introduction}
+
+Most programmers use \diff every day without noticing. Any sophisticated version control system will use a \diff algorithm to find the difference between different versions of a file; this difference serves as an indicator of the difference between versions. Git, the version control system originally created to keep track of the development of the Linux kernel, works by keeping track of snapshots (commits) of a collection of files (a repository) at certain points in time. These snapshots summarize the state of each file in the folder at a certain version by keeping track of the differences between that file and the previous state of the file. The difference between two files is calculated by running a \diff algorithm, which produces a patch file. This patch file contains an easily-parseable summary of the changes necessary to convert one version of a file to another. Git then uses the \patch algorithm to apply the changes laid out in the patch to the old file, outputting the new file. 
+
+The \diff program that ships with Git has four variant algorithms: \textbf{Myers}, \textbf{minimal}, \textbf{patience}, and \textbf{histogram}. The Myers algorithm is the original Git \diff algorithm and remains the default, and in fact dates back to 1986 (Linus Torvalds first started developing Git in 2005). 
+
+%AND THE LONGEST COMMON SUBSEQUENCE
+%HUNT-MCILROY -> LONGEST COMMON SUBSEQUENCE
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Motivation}
+
+The \diff algorithm is a critical function at the heart of Git and other version control programs, but it also has many other important uses. \diff algorithms are used to determine the difference between different genomes (Eugene Myers is a bioinformatician). One particularly new development is the use of \diff algorithms to detect the difference between a representative virtual Direct Object Model (DOM) and the rendered DOM in a web-page; using intelligent \diff algorithms in this context allow for tremendous performance gains. 
+
+As such, it is essential that \diff be a both accurate and efficient function. We will see below that there are several parameters for accuracy, but efficiency is clear: \diff is a program that will be run many times by many other programs, so it must be as space and time efficient as possible without sacrificing accuracy. 
+
+
+\section{Background}
+
+The Wagner-Fischer algorithm was the first algorithm widely used to calculate the edit distance between two sequences \citep{wagner}. Wagner-Fischer is a dynamic programming solution that computes the Levenshtein edit distance between two strings by building up the edit distance between smaller subsequences of each of the strings, in typical dynamic programming style. Implemented in its original form, Wagner-Fischer runs in $O(n^2)$ time and space, as it builds an $n \times n$ array to compare every subsequence of increasing size with every other subsequence of increasing size.\footnote{An example of the Wagner-Fischer algorithm is implemented in the attached code.} While Hirschberg was able to improve Wagner-Fischer to run in linear space, his implementation still runs in $O(n^2)$ time \citep{hirschberg75}. The Hunt-McIlroy algorithm modified the Wagner-Fischer algorithm to only look at candidates that are viable, thus employing a divide and conquer method to avoid filling out an entire $n\times n$ array \citep{hunt}. This algorithm was shipped as the first \diff algorithm with the fifth edition of Unix in 1974 \citep{zeidman}, and remained the default \diff algorithm until it was eventually replaced by the Myers \diff algorithm. 
+
+Aho, Hirschberg, and Ullman proved via decision trees that any with edit distance algorithm using equal-unequal comparisons has a $O(n^2)$ worst-case runtime, as it will require $O(n^2)$ equal-unequal comparisons \citep{aho}. In the case of a more restricted alphabet, they further proved that $O(n\times s)$ comparisons are necessary, where $s$ is the size of the alphabet used \citep{aho}. Hirschberg went on to use information theory to prove that there must be at least $O(n log(n))$ comparisons in any decision tree that solves the lowest-common subsequence problem using less than-equal-greater than comparisons \citep{hirschberg77}.
+
+Myers tried to work around this issue by focusing on the size of the longest common subsequence instead. In most use-cases of \diff, the difference between the two sequences should be small relative to the sequences themselves. In a program, for example, the change could be several lines out of several thousand; in a DNA strand, the change could be a small mutation between instances. To accomodate this, Myers defines a parameter 
+\begin{align*}
+D = 2(N - L),
+\end{align*}
+where $N$ is the length of the sequences being compared and $L$ is the length of the longest common subsequence. As such, $D$ is the length of the shortest edit script \citep{myers}. Given this, the expected runtime of Myers' diff algorithm is $O(N + D^2)$ and the worst-case is $O(N log(N) + D^2)$. Myers claims that his algorithm runs two to four times faster than the Hunt-McIlroy algorithm, which was used as the Unix \diff algorithm before it adopted the Myers algorithm \citep{hunt}. 
+
+
+\section{Interface}
+
+The general \diff algorithm can be conceived as follows:
+
+Input: two sequences $A$ and $B$
+
+Output: an edit script consisting of a set of insertion and deletion commands that transform $A$ into $B$. 
+
+
+Note that while the length of the two sequences need not be equal or similar, many of the \diff algorithm variations are designed to optimize for sequences of similar length as that is the most common input. As such, all runtimes are described in terms of $n$, the length of the input sequence.
+
+There are a range of different styles for edit scripts produced by different \diff algorithms, but the version implemented in the attached code produces an edit script of the following format:
+
+%%%
+%%% EDIT SCRIPT STYLE OF MY IMPLEMENTATIOM
+%%%
+
+%%% IMPLEMENT PATCH?
+
+\section{The Myers algorithm}
+
+The Myers algorithm is a greedy algorithm to find the longest common subsequence between input sequences $A$ and $B$.
+
+In the visualization of the edit graph, the different types of edges correspond to different edit behaviors. A diagonal edge indicates that there is no change, e.g. $a_x = b_y$. A horizontal edge represents the deletion of a symbol, and a vertical edge represents the insertion of a symbol. 
+
+As such, the number of horizontal and vertical edges is equal to the length of the edit script. 
+
+
+
+\subsection{Illustration}
+A walkthrough
+
+\subsection{Example output}
+
+\section{The linear space refinement}
+
+COMPARE the regular version w the linear space refinement. 
+" The linear space refinement is roughly twice as slow as the
+basic O(ND) algorithm but still competitive because it can perform extremely
+large compares that are out of the range of other algorithms. "
+
+" For instance, two
+1.5 million byte sequences were compared in less than two minutes (on a VAX
+785 running 4.2 BSD UNIX) even though the difference was greater than 500. "
+
+
+\section{Analysis}
+
+Let's maybe do benchmarks?
+
+
+\bibliographystyle{plainnat}
+\balance\bibliography{bibliography}
+
+\end{document}

@@ -1,3 +1,5 @@
+import time
+
 def Wagner_Fischer(in_string, out_string, 
     insertion_cost=1, deletion_cost=1, substitution_cost=1):
     # Will produce a matrix of edit distances such that d[i,j] is the 
@@ -34,3 +36,94 @@ def Wagner_Fischer(in_string, out_string,
 # Wagner_Fischer("aebc","abde") == 3
 # Wagner_Fischer([1,2,3],[1,2,3,4]) == 1
 # Wagner_Fischer([1,2,3],[1,2,4,4]) == 2
+
+def Myers(in_string, out_string):
+    a, b = in_string, out_string
+    m, n = len(a), len(b)
+
+    # if m > n:
+    #     # if in string is longer than out string, swap their positions
+    #     a, b = b, a
+    #     m, n = n, m
+
+    def snake(k, y):
+        # snakes across the diagonal as long as a[x] and b[y] are identical
+        x = y - k
+
+        # these counts differ from the algorithm because of zero-counting
+        while (x < m) and (y < n) and (a[x] == b[y]):
+            x += 1
+            y += 1
+        return y
+
+
+    offset = m
+    delta = m - n
+    size = m + n + 3
+    
+    fp = [-1]*size
+
+    #   len(fp), offset
+
+    p = -1
+
+    while True:
+        p += 1
+
+        # iterate from -p through delta
+        for k in range(-p, delta, 1):
+            #   len(fp), (k, offset)
+            fp[k + offset] = snake(k, max(fp[k - 1 + offset] + 1, 
+                                          fp[k + 1 + offset]    ))
+
+        # iterate backwards from p + delta down to delta
+        for k in range(delta + p, delta, -1):
+            fp[k + offset] = snake(k, max(fp[k - 1 + offset] + 1, 
+                                          fp[k + 1 + offset]    ))
+
+        fp[delta + offset] = snake(delta, max(fp[delta - 1 + offset] + 1,
+                                              fp[delta + 1 + offset]    ))
+
+        if fp[delta + offset] >= n:
+            return delta + (2 * p)
+
+def test(fun):
+    # speed test texts from Google's Neil Fraser
+    # https://code.google.com/p/google-diff-match-patch/
+    # Set up as a character-by-character diff, so much slower and more precise
+    text1 = open("speedtest1.txt").readlines()
+    text2 = open("speedtest2.txt").readlines()
+
+    start_time = time.time()
+    fun(text1, text2)
+    fun("abc", "xyz")
+    fun("1234abcdef", "1234xyz")
+    fun("1234", "1234xyz")
+    fun("abc", "xyz")
+    fun("abcdef1234", "xyz1234")
+    fun("1234", "xyz1234")
+    fun("", "abcd")
+    fun("abc", "abcd")
+    fun("123456xxx", "xxxabcd")
+
+    end_time = time.time()
+
+    print "Elapsed time: {0}".format(end_time - start_time)
+
+def main():
+    
+    test(Wagner_Fischer)
+    test(Myers)
+
+
+main()
+
+
+
+
+
+
+
+
+
+
