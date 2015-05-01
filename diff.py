@@ -1,7 +1,7 @@
 import time
 
 def Wagner_Fischer(in_string, out_string, 
-    insertion_cost=1, deletion_cost=1, substitution_cost=1):
+    insertion_cost=1, deletion_cost=1, substitution_cost=2):
     # Will produce a matrix of edit distances such that d[i,j] is the 
     # Levenshtein difference between in_string[:i] and out_string[:j]. These 
     # i and j are 1-indexed, as the Wagner-Fischer algorithm requires an 
@@ -37,14 +37,13 @@ def Wagner_Fischer(in_string, out_string,
 # Wagner_Fischer([1,2,3],[1,2,3,4]) == 1
 # Wagner_Fischer([1,2,3],[1,2,4,4]) == 2
 
-def Myers(in_string, out_string):
-    a, b = in_string, out_string
+def Myers(a, b):
     m, n = len(a), len(b)
 
-    # if m > n:
-    #     # if in string is longer than out string, swap their positions
-    #     a, b = b, a
-    #     m, n = n, m
+    if m > n:
+        # if in string is longer than out string, swap their positions
+        a, b = b, a
+        m, n = n, m
 
     def snake(k, y):
         # snakes across the diagonal as long as a[x] and b[y] are identical
@@ -57,14 +56,11 @@ def Myers(in_string, out_string):
         return y
 
 
-    offset = m
-    delta = m - n
+    offset = m + 1
+    delta = n - m
     size = m + n + 3
     
     fp = [-1]*size
-
-    #   len(fp), offset
-
     p = -1
 
     while True:
@@ -84,7 +80,7 @@ def Myers(in_string, out_string):
         fp[delta + offset] = snake(delta, max(fp[delta - 1 + offset] + 1,
                                               fp[delta + 1 + offset]    ))
 
-        if fp[delta + offset] >= n:
+        if fp[delta + offset] >= n: 
             return delta + (2 * p)
 
 def test(fun):
@@ -95,16 +91,16 @@ def test(fun):
     text2 = open("speedtest2.txt").readlines()
 
     start_time = time.time()
-    fun(text1, text2)
-    fun("abc", "xyz")
-    fun("1234abcdef", "1234xyz")
-    fun("1234", "1234xyz")
-    fun("abc", "xyz")
-    fun("abcdef1234", "xyz1234")
-    fun("1234", "xyz1234")
-    fun("", "abcd")
-    fun("abc", "abcd")
-    fun("123456xxx", "xxxabcd")
+    print fun(text1, text2)
+    print fun("abc", "xyz")
+    print fun("1234abcdef", "1234xyz")
+    print fun("1234", "1234xyz")
+    print fun("abc", "xyz")
+    print fun("abcdef1234", "xyz1234")
+    print fun("1234", "xyz1234")
+    print fun("", "abcd")
+    print fun("abc", "abcd")
+    print fun("123456xxx", "xxxabcd")
 
     end_time = time.time()
 
