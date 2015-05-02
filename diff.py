@@ -33,10 +33,6 @@ def Wagner_Fischer(in_string, out_string,
 
     return d[-1][-1] # Levenshtein edit distance for in_string -> out_string
 
-# Wagner_Fischer("aebc","abde") == 3
-# Wagner_Fischer([1,2,3],[1,2,3,4]) == 1
-# Wagner_Fischer([1,2,3],[1,2,4,4]) == 2
-
 def Myers(a, b):
     m, n = len(a), len(b)
 
