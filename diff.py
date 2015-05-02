@@ -91,24 +91,45 @@ def test(fun):
     text2 = open("speedtest2.txt").readlines()
 
     start_time = time.time()
-    print fun(text1, text1)
-    # print fun("abc", "xyz")
-    # print fun("1234abcdef", "1234xyz")
-    # print fun("1234", "1234xyz")
-    # print fun("abc", "xyz")
-    # print fun("abcdef1234", "xyz1234")
-    # print fun("1234", "xyz1234")
-    # print fun("", "abcd")
-    # print fun("abc", "abcd")
-    # print fun("123456xxx", "xxxabcd")
+
+    # Google test suite and trivial examples
+    fun(text1, text2)
+    fun("abc", "xyz")
+    fun("1234abcdef", "1234xyz")
+    fun("1234", "1234xyz")
+    fun("abc", "xyz")
+    fun("abcdef1234", "xyz1234")
+    fun("1234", "xyz1234")
+    fun("", "abcd")
+    fun("abc", "abcd")
+    fun("123456xxx", "xxxabcd")
 
     end_time = time.time()
 
-    print "Elapsed time: {0}".format(end_time - start_time)
+    print "Google test suite elapsed time: {0}".format(end_time - start_time)
+
+    # Identical file
+    start_time = time.time()
+    fun(text1, text1)
+    end_time = time.time()
+    print "Identical file elapsed time: {0}".format(end_time - start_time)
+    
+    text1 = open("plot1000").readlines()
+    text2 = open("plot6000").readlines()
+
+    # Large, effectively random and dissimilar files
+
+    start_time = time.time()
+    fun(text1, text2)
+    end_time = time.time()
+    print "Large random data elapsed time: {0}".format(end_time - start_time)
+
 
 def main():
     
+    print "Wagner_Fischer testing:"
     test(Wagner_Fischer)
+    print "Myers testing:"
     test(Myers)
 
 
